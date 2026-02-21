@@ -7,10 +7,10 @@ const LoginForm = () => {
 
         const data = {
             username: formData.get("username"),
-            password: formData.get("userpw")
+            password: formData.get("password")
         };
 
-        const response = await fetch("http://localhost:8080/login", {
+        const response = await fetch("http://localhost:8080/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -31,7 +31,7 @@ const LoginForm = () => {
     return (
         <form onSubmit={handleSubmit}>
             <input type="text" name="username" placeholder="이메일" />
-            <input type="password" name="userpw" placeholder="비밀번호" />
+            <input type="password" name="password" placeholder="비밀번호" />
             <button type="submit">확인</button>
         </form>
     );
