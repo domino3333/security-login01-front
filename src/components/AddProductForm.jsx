@@ -2,6 +2,7 @@ import { useState } from "react";
 
 const AddProductForm = () => {
     const [input, setInput] = useState({});
+    const [imagePreview, setImagePreview] = useState(null);
 
     const observeInput = (e) => {
         setInput({
@@ -10,20 +11,38 @@ const AddProductForm = () => {
         });
     };
 
+    const handleImageChange = (e) => {
+       
+        const file = e.target.files[0];
+        console.log(file);
+        if (file) {
+            setInput({
+                ...input,
+                productImage: file
+            });
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+
+
     const submitProduct = async () => {
         try {
+            const formData = new FormData();
+            formData.append("productName", input.productName || "");
+            formData.append("productQuantity", input.productQuantity || 0);
+            if (input.productImage) formData.append("productImage", input.productImage);
+
             const res = await fetch("http://localhost:8080/admin/product/add", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
                 credentials: "include",
-                body: JSON.stringify(input)
+                body: formData // JSON 대신 FormData로 전송
             });
 
             if (res.ok) {
                 alert("상품 추가 완료!");
                 setInput({});
+                setImagePreview(null);
             } else {
                 alert("상품 추가 실패!");
             }
@@ -32,9 +51,28 @@ const AddProductForm = () => {
             alert("서버 오류 발생");
         }
     };
+
     return (
         <div className="container mt-4">
             <h1>관리자 페이지</h1>
+
+            <div className="mb-3">
+                <label htmlFor="productImage" className="form-label">상품 이미지:</label>
+                <input
+                    type="file"
+                    name="productImage"
+                    id="productImage"
+                    className="form-control"
+                    onChange={handleImageChange}
+                    accept="image/*"
+                />
+            </div>
+
+            {imagePreview && (
+                <div className="mb-3">
+                    <img src={imagePreview} alt="미리보기" className="img-thumbnail" style={{ maxWidth: "200px" }} />
+                </div>
+            )}
 
             <div className="mb-3">
                 <label htmlFor="productName" className="form-label">상품명:</label>
