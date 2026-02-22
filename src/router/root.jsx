@@ -4,12 +4,13 @@ import { Suspense,lazy } from "react";
 import Home from "../pages/Home";
 import Loading from "../pages/Loading";
 import MainPage from "../pages/MainPage";
+import AdminHome from "../pages/AdminHome";
 const root = createBrowserRouter([
     {
         path:'/',
         element:(
             <Suspense fallback={<Loading/>}>
-                <Home/>
+                <AdminHome/>
             </Suspense>
         )
     },
