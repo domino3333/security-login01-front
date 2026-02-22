@@ -1,6 +1,7 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import { Suspense, lazy, useState, useEffect } from "react";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import Loading from "../pages/Loading";
+import { useUser, UserProvider } from "../context/UserContext";
 
 const LoginForm = lazy(() => import("../components/LoginForm"));
 const MainPage = lazy(() => import("../pages/MainPage"));
@@ -8,42 +9,26 @@ const AdminHome = lazy(() => import("../pages/AdminHome"));
 const AddProductForm = lazy(() => import("../components/AddProductForm"));
 
 // 로그인 필요
-const ProtectedRoute = ({ children, user }) => {
-    if (!user) return <Navigate to="/login" replace />;
+const ProtectedRoute = ({ children }) => {
+    const { user } = useUser();
+    if (!user) return <Navigate to="/login" />;
     return children;
 };
 
 // 관리자 전용
-const AdminRoute = ({ children, user }) => {
-    if (!user || !user.roles.includes("ADMIN")) return <Navigate to="/MainPage" replace />;
+const AdminRoute = ({ children }) => {
+    const { user } = useUser();
+    if (!user || !user.roles.includes("ADMIN")) return <Navigate to="/MainPage" />;
     return children;
 };
 
-// AppRouter 훅 컴포넌트
-export default function AppRouter() {
-    const [user, setUser] = useState(null);
-
-    // 마운트 시 서버에서 권한/사용자 정보 가져오기
-    useEffect(() => {
-        fetch("http://localhost:8080/api/give/me/admin", {
-            method: "GET",
-            credentials: "include", // 쿠키 전송
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("권한 정보 없음");
-                return res.json();
-            })
-            .then(data => setUser({ email: data.email, roles: data.roles }))
-            .catch(() => setUser(null));
-    }, []);
-
-    // 라우터 정의
+const AppRouterContent = () => {
     const router = createBrowserRouter([
         {
             path: "/login",
             element: (
                 <Suspense fallback={<Loading />}>
-                    <LoginForm setUser={setUser} />
+                    <LoginForm />
                 </Suspense>
             )
         },
@@ -51,7 +36,7 @@ export default function AppRouter() {
             path: "/MainPage",
             element: (
                 <Suspense fallback={<Loading />}>
-                    <ProtectedRoute user={user}>
+                    <ProtectedRoute>
                         <MainPage />
                     </ProtectedRoute>
                 </Suspense>
@@ -61,7 +46,7 @@ export default function AppRouter() {
             path: "/admin",
             element: (
                 <Suspense fallback={<Loading />}>
-                    <AdminRoute user={user}>
+                    <AdminRoute>
                         <AdminHome />
                     </AdminRoute>
                 </Suspense>
@@ -71,7 +56,7 @@ export default function AppRouter() {
             path: "/admin/product/add",
             element: (
                 <Suspense fallback={<Loading />}>
-                    <AdminRoute user={user}>
+                    <AdminRoute>
                         <AddProductForm />
                     </AdminRoute>
                 </Suspense>
@@ -79,5 +64,14 @@ export default function AppRouter() {
         }
     ]);
 
-    return router;
+    return <RouterProvider router={router} />;
+};
+
+// UserProvider로 감싸기
+export default function AppRouter() {
+    return (
+        <UserProvider>
+            <AppRouterContent />
+        </UserProvider>
+    );
 }

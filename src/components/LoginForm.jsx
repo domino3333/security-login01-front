@@ -1,7 +1,9 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 const LoginForm = () => {
     const nav = useNavigate();
+    const { setUser } = useUser();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -12,12 +14,11 @@ const LoginForm = () => {
             password: formData.get("password")
         };
 
-        // 로그인 요청
         const response = await fetch("http://localhost:8080/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
-            credentials: "include" // 쿠키 전송
+            credentials: "include"
         });
 
         if (!response.ok) {
@@ -25,10 +26,10 @@ const LoginForm = () => {
             return;
         }
 
-        // 권한 확인 API 호출
-        const meResponse = await fetch("http://localhost:8080/api/me", {
+        // 권한 정보 가져오기
+        const meResponse = await fetch("http://localhost:8080/api/give/me/admin", {
             method: "GET",
-            credentials: "include" // 쿠키 전송
+            credentials: "include"
         });
 
         if (!meResponse.ok) {
@@ -37,14 +38,11 @@ const LoginForm = () => {
         }
 
         const userInfo = await meResponse.json();
-        console.log(userInfo);
+        setUser({ email: userInfo.email, roles: userInfo.roles });
 
-        // ADMIN 권한 있으면 admin 페이지, 없으면 일반 main 페이지
-        if (userInfo.roles.includes("ADMIN")) {
-            nav("/admin");
-        } else {
-            nav("/MainPage");
-        }
+        // 권한에 따라 이동
+        if (userInfo.roles.includes("ADMIN")) nav("/admin");
+        else nav("/MainPage");
     };
 
     return (
