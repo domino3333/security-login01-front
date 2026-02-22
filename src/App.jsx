@@ -1,11 +1,13 @@
 import './App.css'
-import Home from './pages/Home'
+import { RouterProvider } from 'react-router-dom'
+import root from './router/root'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
 
   return (
     <>
-    <Home/>
+    <RouterProvider router={root}/>
     </>
   )
 }
