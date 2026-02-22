@@ -1,5 +1,9 @@
+import { useNavigate } from "react-router";
+
+
 const LoginForm = () => {
 
+    const nav = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -26,6 +30,10 @@ const LoginForm = () => {
 
         const result = await response.json();
         console.log(result);
+        // HttpOnly 쿠키라 JS에서는 토큰 확인 불가
+        // 그냥 로그인 성공 메시지만 보고 페이지 이동
+        alert("로그인 성공!");
+        nav("/MainPage"); // 메인 페이지 이동
     };
 
     return (

@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { Suspense,lazy } from "react";
 import Home from "../pages/Home";
 import Loading from "../pages/Loading";
+import MainPage from "../pages/MainPage";
 const root = createBrowserRouter([
     {
         path:'/',
@@ -11,7 +12,17 @@ const root = createBrowserRouter([
                 <Home/>
             </Suspense>
         )
+    },
+    {
+       path:'/MainPage',
+        element:(
+            <Suspense fallback={<Loading/>}>
+                <MainPage/>
+            </Suspense>
+        ) 
+
     }
+
 ])
 
 export default root;
