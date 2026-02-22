@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const AddProductForm = () => {
     const [input, setInput] = useState({});
     const [imagePreview, setImagePreview] = useState(null);
+    const nav = useNavigate();
 
     const observeInput = (e) => {
         setInput({
@@ -43,6 +45,7 @@ const AddProductForm = () => {
                 alert("상품 추가 완료!");
                 setInput({});
                 setImagePreview(null);
+                 nav('/admin')
             } else {
                 alert("상품 추가 실패!");
             }
@@ -54,7 +57,7 @@ const AddProductForm = () => {
 
     return (
         <div className="container mt-4">
-            <h1>관리자 페이지</h1>
+            <h1>상품 추가 페이지</h1>
 
             <div className="mb-3">
                 <label htmlFor="productImage" className="form-label">상품 이미지:</label>

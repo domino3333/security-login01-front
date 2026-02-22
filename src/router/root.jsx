@@ -6,9 +6,19 @@ import Loading from "../pages/Loading";
 import MainPage from "../pages/MainPage";
 import AdminHome from "../pages/AdminHome";
 import AddProductForm from "../components/AddProductForm";
+import LoginForm from "../components/LoginForm";
 const root = createBrowserRouter([
+{
+        path:'/login',
+        element:(
+            <Suspense fallback={<Loading/>}>
+                <LoginForm/>
+            </Suspense>
+        )
+    },
+
     {
-        path:'/',
+        path:'/admin',
         element:(
             <Suspense fallback={<Loading/>}>
                 <AdminHome/>
