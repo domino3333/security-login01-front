@@ -7,32 +7,37 @@ const MainPage = lazy(() => import("../pages/MainPage"));
 const AdminHome = lazy(() => import("../pages/AdminHome"));
 const AddProductForm = lazy(() => import("../components/AddProductForm"));
 
-// 로그인만 필요
+// 로그인 필요
 const ProtectedRoute = ({ children, user }) => {
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" replace />;
     return children;
 };
 
 // 관리자 전용
 const AdminRoute = ({ children, user }) => {
-    if (!user || !user.roles.includes("ADMIN")) return <Navigate to="/MainPage" />;
+    if (!user || !user.roles.includes("ADMIN")) return <Navigate to="/MainPage" replace />;
     return children;
 };
 
+// AppRouter 훅 컴포넌트
 export default function AppRouter() {
     const [user, setUser] = useState(null);
 
-    // 로그인 후 서버에서 권한/정보 가져오기
+    // 마운트 시 서버에서 권한/사용자 정보 가져오기
     useEffect(() => {
         fetch("http://localhost:8080/api/give/me/admin", {
             method: "GET",
             credentials: "include", // 쿠키 전송
         })
-            .then(res => res.json())
-            .then(data => setUser(data))
+            .then(res => {
+                if (!res.ok) throw new Error("권한 정보 없음");
+                return res.json();
+            })
+            .then(data => setUser({ email: data.email, roles: data.roles }))
             .catch(() => setUser(null));
     }, []);
 
+    // 라우터 정의
     const router = createBrowserRouter([
         {
             path: "/login",
