@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Loading from "../pages/Loading";
 import { useUser, UserProvider } from "../context/UserContext";
@@ -8,66 +8,39 @@ const MainPage = lazy(() => import("../pages/MainPage"));
 const AdminHome = lazy(() => import("../pages/AdminHome"));
 const AddProductForm = lazy(() => import("../components/AddProductForm"));
 
-// 로그인 필요
-const ProtectedRoute = ({ children }) => {
+// 훅은 컴포넌트 안에서만 사용
+const ProtectedRouteWrapper = ({ Component }) => {
     const { user } = useUser();
     if (!user) return <Navigate to="/login" />;
-    return children;
+    return (
+        <Suspense fallback={<Loading />}>
+            <Component />
+        </Suspense>
+    );
 };
 
-// 관리자 전용
-const AdminRoute = ({ children }) => {
+const AdminRouteWrapper = ({ Component }) => {
     const { user } = useUser();
     if (!user || !user.roles.includes("ADMIN")) return <Navigate to="/MainPage" />;
-    return children;
+    return (
+        <Suspense fallback={<Loading />}>
+            <Component />
+        </Suspense>
+    );
 };
 
+// 라우터 정의
 const AppRouterContent = () => {
     const router = createBrowserRouter([
-        {
-            path: "/login",
-            element: (
-                <Suspense fallback={<Loading />}>
-                    <LoginForm />
-                </Suspense>
-            )
-        },
-        {
-            path: "/MainPage",
-            element: (
-                <Suspense fallback={<Loading />}>
-                    <ProtectedRoute>
-                        <MainPage />
-                    </ProtectedRoute>
-                </Suspense>
-            )
-        },
-        {
-            path: "/admin",
-            element: (
-                <Suspense fallback={<Loading />}>
-                    <AdminRoute>
-                        <AdminHome />
-                    </AdminRoute>
-                </Suspense>
-            )
-        },
-        {
-            path: "/admin/product/add",
-            element: (
-                <Suspense fallback={<Loading />}>
-                    <AdminRoute>
-                        <AddProductForm />
-                    </AdminRoute>
-                </Suspense>
-            )
-        }
+        { path: "/login", element: <LoginForm /> },
+        { path: "/mainPage", element: <ProtectedRouteWrapper Component={MainPage} /> },
+        { path: "/admin", element: <AdminRouteWrapper Component={AdminHome} /> },
+        { path: "/admin/product/add", element: <AdminRouteWrapper Component={AddProductForm} /> },
     ]);
 
     return <RouterProvider router={router} />;
 };
 
-// UserProvider로 감싸기
 export default function AppRouter() {
     return (
         <UserProvider>
